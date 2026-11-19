@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "pulsing-dot",
+        "value": "*",
+        "files": [
+          "router/pages/fibre.html"
+        ],
+        "createdAt": "2026-11-19T22:21:39.250Z",
+        "reason": "beat dot marks the live MPCP clock, which ticks visibly beside it: liveness is real, not decorative"
+      }
+    ]
+  }
+}
