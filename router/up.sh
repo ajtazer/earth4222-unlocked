@@ -1,6 +1,12 @@
 #!/bin/sh
 # Runs ON the router: deploy.sh copies it into /run/wiz and runs it. Idempotent; prints a checklist.
 cd /run/wiz
+# inline style.css into every page: the server takes one request at a time, so a separate
+# stylesheet request from a phone (fired alongside the page) often gets refused -> unstyled page
+for f in pages/*.html; do
+  awk -v css=pages/style.css '/<link rel="stylesheet" href="\/style.css">/ { print "<style>"; while ((getline l < css) > 0) print l; print "</style>"; next } { print }' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+done
+
 NAMES="tazer"     # http://<name> -> pages server. Add a name here, re-deploy.
 IP=192.168.1.2    # spare LAN IP outside the DHCP pool (.33-.254)
 
