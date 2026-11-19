@@ -35,7 +35,7 @@ Mac / wide screens (two columns):
 ## What it does
 - **Bulb** — on/off, brightness, white temperature, colours, WiZ scenes and speed, sleep timer.
 - **Devices** — who's on Wi-Fi with a device-type icon (phone, computer, TV, smart home, router) and OS guessed from its name and Wi-Fi chip, band, signal, live ↓/↑ speed and data since joining (from the Wi-Fi driver's `/proc/wlan*/sta_info`), wired devices from the bridge table.
-- **Fibre** — optical receive/transmit power, module temperature, voltage and laser current via the router's own `diag` tool, with a healthy/weak/critical verdict.
+- **Fibre** — a live optical scope: receive/transmit power, temperature, voltage and laser bias via the router's own `diag` tool with a healthy/weak/critical verdict, a link-budget headroom bar, your EPON **LLID** and the **MPCP clock** (the 16 ns-tick counter the OLT keeps the ONT synced to) ticking live, and a 24 h laser-health chart (Rx + bias) from a background logger.
 - **Internet-down alarm** — pings out every 20 s; on an outage the bulb blinks and stays red, then returns to what it showed before.
 - **`http://tazer`** — a spare LAN IP on the router, port 80 redirected to the app, and a side `dnsmasq` answering the name.
 

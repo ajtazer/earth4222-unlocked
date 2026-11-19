@@ -20,6 +20,8 @@ for p in $PORTS; do
 done
 [ -f mon.pid ] && kill $(cat mon.pid) 2>/dev/null
 ./sh monitor </dev/null >/dev/null 2>&1 & echo $! > mon.pid
+[ -f flog.pid ] && kill $(cat flog.pid) 2>/dev/null
+./sh fibrelog </dev/null >/dev/null 2>&1 & echo $! > flog.pid  # laser health history, every 5 min
 
 # names: $IP:80 -> :8080, and a side dnsmasq on :5353 answering $NAMES (forwards the rest to the
 # real dnsmasq) with LAN DNS routed through it. Never touch the real one: the router regenerates
@@ -53,3 +55,4 @@ ok "internet alarm" 'kill -0 $(cat mon.pid)'
 ok "names DNS"      'kill -0 $(cat dns.pid)'
 ok "IP $IP :80 x3"  '[ "$(iptables -t nat -S PREROUTING | grep -c -- "-d $IP/32 .*--dport 80 ")" = 3 ]'
 ok "bulb reachable" 'printf "GET /api?a=status HTTP/1.0\r\n\r\n" | ./sh | grep -q result'
+ok "fibre logger"   'kill -0 $(cat flog.pid)'

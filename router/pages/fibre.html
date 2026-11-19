@@ -7,7 +7,6 @@
 <meta name="theme-color" content="#fff4e6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1c1714" media="(prefers-color-scheme: dark)">
 <title>Fibre</title>
-<link rel="icon" href="data:,">
 <link rel="stylesheet" href="/style.css">
 <style>
   .verdict { font-size: 1.75rem; font-weight: 700; line-height: 1.15; margin: .25rem 0 .125rem; }
@@ -18,16 +17,34 @@
   .scale span { position: absolute; transform: translateX(-50%); }
   .scale span:first-child { transform: none; } .scale span:last-child { transform: translateX(-100%); }
   #advice { margin-top: 1rem; }
+  /* link-budget headroom bar */
+  .budget { height: 1.5rem; border-radius: 8px; background: var(--well); overflow: hidden; display: flex; }
+  .budget i { height: 100%; display: block; }
+  .budget .used { background: var(--ink-3); }
+  .budget .head { background: var(--good); }
+  .blabel { display: flex; justify-content: space-between; font-size: .8125rem; color: var(--ink-2); margin-top: .375rem; }
+  /* MPCP clock */
+  .clock { font-variant-numeric: tabular-nums; font-size: 1.5rem; font-weight: 700; letter-spacing: -.01em; }
+  .clock small { font-size: .8125rem; font-weight: 500; color: var(--ink-2); }
+  .beat { display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; background: var(--good); margin-left: .375rem; vertical-align: middle; animation: beat 1s infinite; }
+  @keyframes beat { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+  @media (prefers-reduced-motion: reduce) { .beat { animation: none; } }
+  /* history chart */
+  .chart { width: 100%; height: 90px; display: block; }
+  .chart path { fill: none; stroke-width: 2; }
+  .legend { display: flex; gap: 1rem; font-size: .8125rem; color: var(--ink-2); margin-top: .5rem; }
+  .legend b { font-weight: 600; }
+  .swatch { display: inline-block; width: .75rem; height: .2rem; border-radius: 2px; vertical-align: middle; margin-right: .25rem; }
 </style>
 </head>
 <body>
 <header class="top"><div><h1>Fibre</h1><p id="line">The light reaching your router from the ISP</p></div></header>
+
 <section class="card strip" aria-label="Bulb">
   <span class="lamp" id="lamp" aria-hidden="true"></span>
   <a class="tx" href="/bulb"><b id="bstate"><span class="skel">loading</span></b><small>Bulb · more controls</small></a>
   <button class="power sm" id="pwr" aria-label="Turn the bulb on or off" aria-pressed="false" disabled><svg class="i" viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></button>
 </section>
-
 
 <section class="card" aria-label="Received signal">
   <p class="verdict" id="word"><span class="skel">loading</span></p>
@@ -35,6 +52,31 @@
   <div class="meter" aria-hidden="true"><i id="needle" style="left:0"></i></div>
   <div class="scale" aria-hidden="true"><span style="left:0">−30</span><span style="left:12%">−27</span><span style="left:24%">−24</span><span style="left:56%">−16</span><span style="left:88%">−8</span><span style="left:100%">−5</span></div>
   <p class="note" id="advice"></p>
+</section>
+
+<section class="card">
+  <h2>Link budget <span id="headnum">–</span></h2>
+  <div class="budget" aria-hidden="true"><i class="used" id="bused"></i><i class="head" id="bhead"></i></div>
+  <div class="blabel"><span id="busedl">loss to you</span><span id="bheadl">headroom</span></div>
+  <p class="note">Space between the light you receive and the −27 dBm floor where the link starts dropping. Most of the loss is the optical splitter you share with other homes, not the fibre length.</p>
+</section>
+
+<section class="card">
+  <h2>EPON link</h2>
+  <div class="list">
+    <div class="row"><span class="tx"><b>Your LLID</b><small>Your identity on the shared fibre</small></span><span class="end" id="llid">–</span></div>
+    <div class="row"><span class="tx"><b>MPCP clock <span class="beat" id="beat" aria-hidden="true"></span></b><small>16 ns ticks, kept in sync with the ISP</small></span><span class="end clock" id="mpcp">–</span></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Laser history <span id="span" class="sub"></span></h2>
+  <svg class="chart" id="chart" viewBox="0 0 300 90" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--good)"></i>Rx power <b id="lrx">–</b></span>
+    <span><i class="swatch" style="background:var(--action)"></i>Laser bias <b id="lbias">–</b></span>
+  </div>
+  <p class="note">Rising bias current over weeks means the laser is ageing; a daily dip in Rx can mean heat. Samples every 5 minutes, up to 24 hours.</p>
 </section>
 
 <section class="card">
@@ -46,30 +88,27 @@
     <div class="row"><span class="tx"><b>Laser current</b><small>Healthy 5 to 60 mA</small></span><span class="end" id="bias">–</span></div>
   </div>
 </section>
-<p class="note">Closer to zero is stronger. −8 to −24 dBm is healthy; below −27 dBm the line starts dropping.</p>
+
 <nav class="tabs" aria-label="Sections">
   <a href="/"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5v-6H9v6H4z"/></svg>Home</a>
   <a href="/bulb"><svg class="i" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>Bulb</a>
   <a href="/devices"><svg class="i" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/></svg>Devices</a>
   <a href="/fibre" aria-current="page"><svg class="i" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>Fibre</a>
 </nav>
+
 <script>
 const $ = id => document.getElementById(id);
-// the router answers one request at a time and refuses others for ~0.2s, so retry briefly
 async function api(q, tries = 10) {
   for (let i = 0; ; i++) {
     try { return await (await fetch("/api?a=" + q)).json(); }
     catch (e) { if (i >= tries) throw e; await new Promise(r => setTimeout(r, 200)); }
   }
 }
-// slider fill: action colour while the light is on, muted when it's off
-const fill = (el, on = true) => el.style.setProperty("--track", `linear-gradient(90deg, ${on ? "var(--action)" : "var(--ink-3)"} ${(el.value - el.min) / (el.max - el.min) * 100}%, var(--well) 0)`);
 const whiteName = k => k <= 3000 ? "Warm white" : k <= 4600 ? "Neutral white" : "Daylight";
 const tempColor = k => { const t = (k - 2200) / 4300; const a = t < .42 ? [[255,154,60],[255,233,199],t/.42] : [[255,233,199],[227,237,255],(t-.42)/.58];
   return "rgb(" + a[0].map((v, i) => Math.round(v + (a[1][i] - v) * a[2])).join(",") + ")"; };
 const lampColor = s => !s || !s.state ? "var(--well)" : s.r !== undefined && !s.temp ? `rgb(${s.r},${s.g},${s.b})` : tempColor(s.temp || 2700);
-const lamp = (color, dim) => { $("lamp").style.setProperty("--lamp", color); $("lamp").style.filter = `brightness(${.8 + .2 * dim / 100})`; };
-// compact bulb strip: the light stays one tap away on every page
+const lamp = (c, dim) => { $("lamp").style.setProperty("--lamp", c); $("lamp").style.filter = `brightness(${.8 + .2 * dim / 100})`; };
 function strip(s) {
   const on = !!(s && s.state);
   $("pwr").disabled = !s; $("pwr").classList.toggle("on", on); $("pwr").setAttribute("aria-pressed", on);
@@ -80,16 +119,41 @@ async function loadStrip() { try { strip((await api("status")).result); } catch 
 $("pwr").onclick = async () => { $("pwr").classList.toggle("on"); try { await api("set&state=toggle"); } catch {} loadStrip(); };
 loadStrip();
 
-const show = (id, v, unit, lo, hi, dp = 1) => {
-  const el = $(id), ok = v != null && v >= lo && v <= hi;
-  el.innerHTML = v == null ? "No reading" : `<b class="${ok ? "" : "bad"}">${v.toFixed(dp)} ${unit}</b><small class="${ok ? "good" : "bad"}">${ok ? "Healthy" : "Out of range"}</small>`;
-};
-async function refresh() {
+// --- MPCP clock: read once, then advance locally at 62.5M ticks/sec (resynced on each fibre poll) ---
+let mpcpBase = null, mpcpAt = 0, mpcpHz = 62500000;
+function tickClock() {
+  if (mpcpBase == null) return;
+  const ticks = mpcpBase + Math.floor((performance.now() - mpcpAt) / 1000 * mpcpHz);
+  const t = ((ticks >>> 0) >>> 0).toString().padStart(10, "0");  // 32-bit wrap, grouped
+  $("mpcp").innerHTML = t.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " <small>ticks</small>";
+}
+setInterval(tickClock, 80);
+
+const ok = (v, lo, hi) => v != null && v >= lo && v <= hi;
+const paint = (id, v, unit, good, dp = 1) => { const el = $(id);
+  el.innerHTML = v == null ? "No reading" : `<b class="${good ? "" : "bad"}">${v.toFixed(dp)} ${unit}</b><small class="${good ? "good" : "bad"}">${good ? "Healthy" : "Out of range"}</small>`; };
+
+function budget(rx, tx) {
+  // headroom above the -27 dBm receiver floor; loss = (OLT launch, assume tx-side ~+4) - rx
+  const floor = -27, head = rx - floor, launch = 4, loss = launch - rx;
+  $("headnum").textContent = head.toFixed(1) + " dB headroom";
+  const total = loss + Math.max(head, 0);
+  $("bused").style.width = (loss / total * 100) + "%";
+  $("bhead").style.width = (Math.max(head, 0) / total * 100) + "%";
+  $("busedl").textContent = `~${loss.toFixed(0)} dB loss`;
+  $("bheadl").textContent = `${head.toFixed(1)} dB left`;
+}
+
+async function pollFibre() {
   if (document.hidden) return;
   try {
     const j = await api("fibre"), rx = j["rx-power"];
-    show("tx", j["tx-power"], "dBm", .5, 5); show("temp", j.temperature, "°C", -10, 70);
-    show("volt", j.voltage, "V", 3.1, 3.5, 2); show("bias", j["bias-current"], "mA", 5, 60);
+    paint("tx", j["tx-power"], "dBm", ok(j["tx-power"], .5, 5));
+    paint("temp", j.temperature, "°C", ok(j.temperature, -10, 70));
+    paint("volt", j.voltage, "V", ok(j.voltage, 3.1, 3.5), 2);
+    paint("bias", j["bias-current"], "mA", ok(j["bias-current"], 5, 60));
+    $("llid").textContent = j.llid == null ? "–" : "#" + j.llid;
+    if (j.mpcp != null) { mpcpBase = j.mpcp >>> 0; mpcpAt = performance.now(); mpcpHz = j.mpcp_hz || 62500000; tickClock(); }
     if (rx == null) { $("word").textContent = "No reading"; $("advice").textContent = "The optical module didn't answer. Try again in a moment."; return; }
     const [w, c, a] = rx > -8 ? ["Too strong", "bad", "Unusually strong, which can overload the receiver. Ask your ISP to check the line."]
       : rx >= -24 ? ["Healthy", "good", "Your fibre signal is healthy. Nothing to do."]
@@ -99,12 +163,30 @@ async function refresh() {
     $("rx").textContent = "Received signal · " + rx.toFixed(1) + " dBm";
     $("advice").textContent = a;
     $("needle").style.left = Math.min(100, Math.max(0, (rx + 30) / 25 * 100)) + "%";
+    budget(rx, j["tx-power"]);
     $("line").className = ""; $("line").textContent = "The light reaching your router from the ISP";
   } catch { $("line").textContent = "Can't reach the router right now"; $("line").className = "err"; }
 }
-refresh();
-setInterval(refresh, 10000);
-document.addEventListener("visibilitychange", refresh);
+
+function drawChart(s) {
+  if (!s || s.length < 2) { $("span").textContent = "(collecting…)"; return; }
+  const xs = s.map(r => r[0]), rx = s.map(r => r[1]), bias = s.map(r => r[4]);
+  const x0 = xs[0], x1 = xs[xs.length - 1] || x0 + 1;
+  const px = t => (t - x0) / (x1 - x0 || 1) * 300;
+  const line = (vals, pad) => { const lo = Math.min(...vals), hi = Math.max(...vals), r = hi - lo || 1;
+    return vals.map((v, i) => `${i ? "L" : "M"}${px(xs[i]).toFixed(1)} ${(80 - (v - lo) / r * (80 - 2 * pad) - pad).toFixed(1)}`).join(" "); };
+  $("chart").innerHTML = `<path d="${line(rx, 8)}" stroke="var(--good)"/><path d="${line(bias, 8)}" stroke="var(--action)"/>`;
+  $("lrx").textContent = rx[rx.length - 1].toFixed(1) + " dBm";
+  $("lbias").textContent = bias[bias.length - 1].toFixed(1) + " mA";
+  const mins = Math.round((x1 - x0) / 60);
+  $("span").textContent = mins >= 120 ? `last ${(mins / 60).toFixed(0)} h` : `last ${mins} min`;
+}
+async function pollLog() { if (document.hidden) return; try { drawChart((await api("fibrelog")).samples || []); } catch {} }
+
+pollFibre(); pollLog();
+setInterval(pollFibre, 5000);
+setInterval(pollLog, 60000);
+document.addEventListener("visibilitychange", () => { pollFibre(); pollLog(); });
 </script>
 </body>
 </html>

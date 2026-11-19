@@ -56,6 +56,22 @@ monitor() {
 }
 [ "$1" = monitor ] && { monitor; exit 0; }
 
+# `sh fibrelog`: optical readings every 5 min -> $D/fibrelog (ring buffer, last 288 = 24h).
+# Lets the Fibre scope plot laser bias (aging) and Rx power (dips) over time.
+fibrelog() {
+  L=$D/fibrelog
+  while :; do
+    rx=$(diag pon get transceiver rx-power </dev/null 2>/dev/null | awk '/Power:/{print $(NF-1);exit}')
+    tx=$(diag pon get transceiver tx-power </dev/null 2>/dev/null | awk '/Power:/{print $(NF-1);exit}')
+    tp=$(diag pon get transceiver temperature </dev/null 2>/dev/null | awk '/Temperature:/{print $(NF-1);exit}')
+    bi=$(diag pon get transceiver bias-current </dev/null 2>/dev/null | awk '/Current:/{print $(NF-1);exit}')
+    [ -n "$rx" ] && echo "$(date +%s) $rx $tx $tp $bi" >> $L
+    tail -288 $L > $L.t 2>/dev/null && mv $L.t $L
+    sleep 300
+  done
+}
+[ "$1" = fibrelog ] && { fibrelog; exit 0; }
+
 # each listener takes one request at a time (up.sh runs several); read -t stops an idle connection hogging one
 read -t 1 -r method path ver || exit 0
 while read -t 1 -r l; do case "$l" in "" | "$CR") break ;; esac; done
@@ -92,7 +108,11 @@ fibrejson() {  # optical module readings via the router's own RTK diag tool (rea
     v=$(diag pon get transceiver $k </dev/null 2>/dev/null | awk '/Power:|Temperature:|Voltage:|Current:/ { print $(NF-1); exit }')
     fj="$fj,\"$k\":${v:-null}"
   done
-  echo "{${fj#,}}"
+  # EPON identity + MPCP clock: our LLID on the shared fibre, and the 16ns-tick counter the OLT keeps us synced to
+  llid=$(diag epon get llid-table </dev/null 2>/dev/null | awk '/valid:1/{print $3; exit}')
+  mp=$(diag epon get local-time </dev/null 2>/dev/null | sed -n 's/.*time:0x\([0-9a-fA-F]*\).*/\1/p')
+  [ -n "$mp" ] && mp=$(( 0x$mp )) || mp=null
+  echo "{${fj#,},\"llid\":${llid:-null},\"mpcp\":${mp},\"mpcp_hz\":62500000}"
 }
 # Wi-Fi driver stats per station + ARP (mac->ip) + router hosts file (ip->name) as a JSON array.
 # wired = in ARP, not on Wi-Fi, and seen on the bridge in the last 60s (drops ghosts of devices that left)
@@ -140,6 +160,8 @@ status)
   r=$(send '{"method":"getPilot","params":{}}') ;;
 net) r=$(netjson) ;;
 fibre) r=$(fibrejson) ;;
+fibrelog)  # laser-health history: "epoch rx tx temp bias" lines -> JSON array
+  r="{\"samples\":[$(awk '{printf "%s[%s,%s,%s,%s,%s]", sep, $1, $2, $3, $4, $5; sep=","}' $D/fibrelog 2>/dev/null)]}" ;;
 devices) r="{\"devices\":$(devarray)}" ;;
 home)  # everything the home page shows, in one request
   b=$(send "$GET")
