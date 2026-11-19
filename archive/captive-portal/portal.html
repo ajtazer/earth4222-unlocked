@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Welcome</title>
+<style>
+  :root { --bg:#111; --card:#1c1c1e; --fg:#f2f2f2; --dim:#8e8e93; --acc:#ffb340; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         background:var(--bg); color:var(--fg); font:16px -apple-system,system-ui,sans-serif; padding:24px 16px; }
+  main { max-width:420px; width:100%; text-align:center; }
+  .wave { font-size:56px; }
+  h1 { font-size:26px; margin:12px 0 8px; letter-spacing:-0.5px; }
+  p { color:var(--dim); line-height:1.5; margin:0 0 20px; }
+  .card { background:var(--card); border-radius:14px; padding:14px 16px; text-align:left; margin-bottom:20px; color:var(--dim); font-size:14px; line-height:1.6; }
+  .card b { color:var(--fg); }
+  button { width:100%; padding:16px; border:0; border-radius:12px; background:var(--acc); color:#111; font-size:17px; font-weight:700; }
+</style>
+</head>
+<body>
+<main>
+  <div class="wave">👋</div>
+  <h1>Welcome to Tazer's Wi-Fi</h1>
+  <p>You're connected. Make yourself at home.</p>
+  <div class="card">
+    💡 Lights and more: <b>http://tazer</b><br>
+    📶 Be nice to the bandwidth, the TV is probably streaming
+  </div>
+  <button id="go" onclick="go()">Continue</button>
+</main>
+<script>
+// tell the router to stop redirecting this device, then hand iOS/macOS the real check page
+// so the sheet flips to "Done"
+async function go() {
+  document.getElementById('go').textContent = 'One sec…';
+  for (let i = 0; i < 10; i++) {
+    try { await fetch('/api?a=portaloff'); break; } catch { await new Promise(r => setTimeout(r, 200)); }
+  }
+  location.href = 'http://captive.apple.com/hotspot-detect.html';
+}
+</script>
+</body>
+</html>

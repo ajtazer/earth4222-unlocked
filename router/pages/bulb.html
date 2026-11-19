@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fff4e6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1714" media="(prefers-color-scheme: dark)">
+<title>Bulb</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+  .hero { display: flex; align-items: center; gap: 1rem; }
+  .hero .lamp { width: 3.5rem; height: 3.5rem; }
+  .hero > div { flex: 1; min-width: 0; }
+  #temp { --track: linear-gradient(90deg, #ff9a3c, #ffe9c7 42%, #e3edff); }
+  .swatches { display: flex; flex-wrap: wrap; gap: .625rem; }
+  .swatches button, .swatches input { width: 2.75rem; height: 2.75rem; padding: 0; border-radius: 50%; border: 3px solid var(--card); box-shadow: 0 0 0 1px var(--border); cursor: pointer; background: var(--c); }
+  .swatches input { -webkit-appearance: none; appearance: none; background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red); }
+  .swatches input::-webkit-color-swatch-wrapper { padding: 0; } .swatches input::-webkit-color-swatch { border: 0; border-radius: 50%; opacity: 0; }
+  .swatches button.sel { box-shadow: 0 0 0 2px var(--action); }
+  .seg-below { margin-top: .5rem; }
+  .more { margin-top: .875rem; }
+  h2.gap { margin-top: 1.25rem; }
+</style>
+</head>
+<body>
+<header class="top"><div><h1>Bulb</h1><p id="line"><span class="skel">loading</span></p></div></header>
+
+<section class="card hero" aria-label="Power">
+  <span class="lamp" id="lamp" aria-hidden="true"></span>
+  <div><p class="big" id="state"><span class="skel">loading</span></p><p class="sub" id="detail"></p></div>
+  <button class="power" id="pwr" aria-label="Turn the bulb on or off" aria-pressed="false" disabled><svg class="i" viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></button>
+</section>
+
+<section class="card">
+  <h2><label for="dim">Brightness</label><span id="dv">–</span></h2>
+  <input type="range" id="dim" min="10" max="100" value="10">
+</section>
+
+<section class="card">
+  <h2><label for="temp">White</label><span id="tv">–</span></h2>
+  <input type="range" id="temp" min="2200" max="6500" step="100" value="2700">
+  <div class="seg seg-below" id="whites">
+    <button data-k="2700">Warm</button><button data-k="4200">Neutral</button><button data-k="6500">Daylight</button>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Colour</h2>
+  <div class="swatches" id="swatches">
+    <input type="color" id="col" value="#ff3b30" aria-label="Pick any colour">
+  </div>
+</section>
+
+<section class="card">
+  <h2>Scene <span id="scn"></span></h2>
+  <div class="chips" id="scenes"></div>
+  <button class="link more" id="morebtn">Show all scenes</button>
+  <div id="speedbox" hidden>
+    <h2 class="gap"><label for="spd">Scene speed</label><span id="sv">–</span></h2>
+    <input type="range" id="spd" min="10" max="200" value="100">
+  </div>
+</section>
+
+<section class="card">
+  <h2>Sleep timer <span id="tmr">Off</span></h2>
+  <div class="seg" id="timer">
+    <button data-m="0">Off</button><button data-m="15" aria-label="15 minutes">15m</button><button data-m="30" aria-label="30 minutes">30m</button><button data-m="60" aria-label="1 hour">1h</button><button data-m="120" aria-label="2 hours">2h</button>
+  </div>
+</section>
+<nav class="tabs" aria-label="Sections">
+  <a href="/"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5v-6H9v6H4z"/></svg>Home</a>
+  <a href="/bulb" aria-current="page"><svg class="i" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>Bulb</a>
+  <a href="/devices"><svg class="i" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/></svg>Devices</a>
+  <a href="/fibre"><svg class="i" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>Fibre</a>
+</nav>
+<script>
+const $ = id => document.getElementById(id);
+// the router answers one request at a time and refuses others for ~0.2s, so retry briefly
+async function api(q, tries = 10) {
+  for (let i = 0; ; i++) {
+    try { return await (await fetch("/api?a=" + q)).json(); }
+    catch (e) { if (i >= tries) throw e; await new Promise(r => setTimeout(r, 200)); }
+  }
+}
+// slider fill: action colour while the light is on, muted when it's off
+const fill = (el, on = true) => el.style.setProperty("--track", `linear-gradient(90deg, ${on ? "var(--action)" : "var(--ink-3)"} ${(el.value - el.min) / (el.max - el.min) * 100}%, var(--well) 0)`);
+const whiteName = k => k <= 3000 ? "Warm white" : k <= 4600 ? "Neutral white" : "Daylight";
+const SCENES = [[6,"Cozy"],[14,"Night light"],[16,"Relax"],[15,"Focus"],[18,"TV time"],[29,"Candlelight"],[5,"Fireplace"],[3,"Sunset"],[1,"Ocean"],[4,"Party"],
+  [11,"Warm white"],[12,"Daylight"],[13,"Cool white"],[30,"Golden white"],[17,"True colours"],[2,"Romance"],[7,"Forest"],[8,"Pastel colours"],[9,"Wake-up"],[10,"Bedtime"],
+  [19,"Plant growth"],[20,"Spring"],[21,"Summer"],[22,"Fall"],[23,"Deep dive"],[24,"Jungle"],[25,"Mojito"],[26,"Club"],[27,"Christmas"],[28,"Halloween"],[31,"Pulse"],[32,"Steampunk"],[33,"Diwali"],[36,"Snowy sky"]];
+const SWATCHES = [["Red","#ff3b30"],["Orange","#ff8a00"],["Yellow","#ffd400"],["Green","#34c759"],["Teal","#00c7be"],["Blue","#1e6bff"],["Purple","#8e4dff"],["Pink","#ff2d78"]];
+let st = null, showAll = false;
+const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+const tempColor = k => { const t = (k - 2200) / 4300; const a = t < .42 ? [[255,154,60],[255,233,199],t/.42] : [[255,233,199],[227,237,255],(t-.42)/.58];
+  return "rgb(" + a[0].map((v, i) => Math.round(v + (a[1][i] - v) * a[2])).join(",") + ")"; };
+const lamp = (color, dim) => { $("lamp").style.setProperty("--lamp", color); $("lamp").style.filter = `brightness(${.8 + .2 * dim / 100})`; };
+
+for (const [n, c] of SWATCHES) {
+  const b = document.createElement("button"); b.style.setProperty("--c", c); b.title = n; b.setAttribute("aria-label", n);
+  b.onclick = () => { const [r, g, bl] = hex(c); lamp(c, $("dim").value); act(`set&state=on&r=${r}&g=${g}&b=${bl}`); };
+  $("swatches").insertBefore(b, $("col"));
+}
+function drawScenes() {
+  $("scenes").innerHTML = "";
+  for (const [id, n] of SCENES.slice(0, showAll ? 99 : 10)) {
+    const b = document.createElement("button"); b.textContent = n;
+    b.className = st && st.sceneId === id ? "sel" : "";
+    b.onclick = () => act(`set&state=on&sceneId=${id}&speed=${$("spd").value}`);
+    $("scenes").append(b);
+  }
+  $("morebtn").textContent = showAll ? "Show fewer scenes" : "Show all scenes";
+}
+$("morebtn").onclick = () => { showAll = !showAll; drawScenes(); };
+
+function render(s, left) {
+  st = s;
+  const on = !!(s && s.state);
+  $("pwr").disabled = !s; $("pwr").classList.toggle("on", on); $("pwr").setAttribute("aria-pressed", on);
+  $("state").textContent = !s ? "Not responding" : on ? "On" : "Off";
+  $("line").textContent = !s ? "Can't reach the bulb. Is it switched on at the wall?" : on ? "Tap a colour, white or scene" : "Turn it on, or pick a light to switch it on";
+  $("line").className = s ? "" : "err";
+  if (s) {
+    const scene = SCENES.find(x => x[0] === s.sceneId);
+    $("detail").textContent = !on ? "" : scene ? scene[1] + " scene" : s.temp ? whiteName(s.temp) + " · " + s.temp + "K" : "Colour";
+    $("dim").value = s.dimming || 100; $("dv").textContent = $("dim").value + "%"; fill($("dim"), on);
+    if (s.temp) { $("temp").value = s.temp; $("tv").textContent = s.temp + "K"; }
+    for (const b of $("whites").children) b.classList.toggle("sel", !!s.temp && Math.abs(s.temp - b.dataset.k) < 300);
+    $("speedbox").hidden = !s.sceneId; if (s.speed) $("spd").value = s.speed; $("sv").textContent = $("spd").value;
+    $("scn").textContent = scene ? scene[1] : "";
+    lamp(!on ? "var(--well)" : s.r !== undefined && !s.temp ? `rgb(${s.r},${s.g},${s.b})` : tempColor(s.temp || 2700), on ? s.dimming : 100);
+  }
+  drawScenes();
+  if (left !== undefined) {
+    $("tmr").textContent = left > 0 ? "Off in " + left + " min" : "Off";
+    for (const b of $("timer").children) b.classList.toggle("sel", left <= 0 && b.dataset.m === "0");
+  }
+}
+async function load() { try { const j = await api("status"); render(j.result || null, j.timer_min_left); } catch { render(null); } }
+async function act(q) { try { await api(q); } catch {} load(); }
+
+$("pwr").onclick = () => { $("pwr").classList.toggle("on"); act("set&state=toggle"); };
+$("dim").oninput = e => { fill(e.target); $("dv").textContent = e.target.value + "%"; lamp($("lamp").style.getPropertyValue("--lamp"), e.target.value); };
+$("dim").onchange = e => act("set&state=on&dimming=" + e.target.value);
+$("temp").oninput = e => { $("tv").textContent = e.target.value + "K"; lamp(tempColor(+e.target.value), $("dim").value); };
+$("temp").onchange = e => act("set&state=on&temp=" + e.target.value);
+for (const b of $("whites").children) b.onclick = () => { lamp(tempColor(+b.dataset.k), $("dim").value); act("set&state=on&temp=" + b.dataset.k); };
+$("col").onchange = e => { const [r, g, b] = hex(e.target.value); lamp(e.target.value, $("dim").value); act(`set&state=on&r=${r}&g=${g}&b=${b}`); };
+$("spd").oninput = e => $("sv").textContent = e.target.value;
+$("spd").onchange = e => act("set&speed=" + e.target.value);
+for (const b of $("timer").children) b.onclick = async () => {
+  try { const j = await api("timer&min=" + b.dataset.m); render(st, j.timer_min_left); } catch {}
+};
+load();
+</script>
+</body>
+</html>

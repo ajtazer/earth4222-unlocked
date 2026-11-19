@@ -1,0 +1,9 @@
+.DS_Store
+router/config.sh
+# impeccable working material (commit PRODUCT.md, DESIGN.md, .impeccable/surfaces, design.json, config.json)
+router/.impeccable/mocks/
+router/.impeccable/review/
+router/.impeccable/reference/
+router/.impeccable/questions/
+router/.impeccable/brief-body.md
+router/.impeccable/decision.json

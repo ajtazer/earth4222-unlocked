@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fff4e6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1714" media="(prefers-color-scheme: dark)">
+<title>tazer</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+  .bulb-head { display: flex; align-items: center; gap: .875rem; }
+  .cols { display: grid; gap: .75rem; grid-template-areas: "bulb" "split" "quick"; }
+  .cols > * { margin: 0; }
+  #bulbcard { grid-area: bulb; } .split { grid-area: split; align-self: start; } #quickcard { grid-area: quick; }
+  @media (min-width: 64rem) {
+    body { max-width: 64rem; }
+    .cols { grid-template-columns: 1fr 1fr; grid-template-areas: "bulb split" "quick split"; align-items: start; }
+  }
+  .bulb-head a { flex: 1; min-width: 0; }
+  #dim { margin-top: .5rem; }
+  .split .card { display: flex; flex-direction: column; gap: .125rem; min-height: 9.5rem; }
+  .split .well { margin-bottom: auto; }
+  .split .big { margin-top: .875rem; }
+</style>
+</head>
+<body>
+<header class="top"><div><h1>tazer</h1><p id="line"><span class="skel">loading</span></p></div></header>
+
+<div class="cols">
+<section class="card" id="bulbcard" aria-label="Bulb">
+  <div class="bulb-head">
+    <span class="lamp" id="lamp" aria-hidden="true"></span>
+    <a href="/bulb"><p class="big" id="bstate"><span class="skel">loading</span></p><p class="sub">Bulb</p></a>
+    <button class="power" id="pwr" aria-label="Turn the bulb on or off" aria-pressed="false" disabled><svg class="i" viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></button>
+  </div>
+  <input type="range" id="dim" min="10" max="100" value="10" aria-label="Brightness" disabled>
+  <a class="link" href="/bulb">Colours, scenes and timer</a>
+</section>
+
+<div class="split">
+  <a class="card" href="/devices">
+    <span class="well"><svg class="i" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/></svg></span>
+    <p class="big" id="dcount"><span class="skel">loading</span></p><p class="sub" id="dspeed">Devices</p>
+  </a>
+  <a class="card" href="/fibre">
+    <span class="well"><svg class="i" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></span>
+    <p class="big" id="fword"><span class="skel">loading</span></p><p class="sub" id="fdbm">Fibre signal</p>
+  </a>
+</div>
+
+<section class="card" id="quickcard" aria-label="Quick lights">
+  <h2>Quick lights</h2>
+  <div class="chips" id="quick">
+    <button data-q="set&state=on&temp=2700&dimming=100">Warm white</button>
+    <button data-q="set&state=on&sceneId=14">Night light</button>
+    <button data-q="set&state=on&sceneId=15">Focus</button>
+    <button data-q="set&state=on&sceneId=16">Relax</button>
+    <button data-q="timer&min=30">Off in 30 min</button>
+  </div>
+</section>
+</div>
+<nav class="tabs" aria-label="Sections">
+  <a href="/" aria-current="page"><svg class="i" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20h-5v-6H9v6H4z"/></svg>Home</a>
+  <a href="/bulb"><svg class="i" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>Bulb</a>
+  <a href="/devices"><svg class="i" viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/></svg>Devices</a>
+  <a href="/fibre"><svg class="i" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>Fibre</a>
+</nav>
+<script>
+const $ = id => document.getElementById(id);
+// the router answers one request at a time and refuses others for ~0.2s, so retry briefly
+async function api(q, tries = 10) {
+  for (let i = 0; ; i++) {
+    try { return await (await fetch("/api?a=" + q)).json(); }
+    catch (e) { if (i >= tries) throw e; await new Promise(r => setTimeout(r, 200)); }
+  }
+}
+// slider fill: action colour while the light is on, muted when it's off
+const fill = (el, on = true) => el.style.setProperty("--track", `linear-gradient(90deg, ${on ? "var(--action)" : "var(--ink-3)"} ${(el.value - el.min) / (el.max - el.min) * 100}%, var(--well) 0)`);
+const whiteName = k => k <= 3000 ? "Warm white" : k <= 4600 ? "Neutral white" : "Daylight";
+const tempColor = k => { const t = (k - 2200) / 4300; const a = t < .42 ? [[255,154,60],[255,233,199],t/.42] : [[255,233,199],[227,237,255],(t-.42)/.58];
+  return "rgb(" + a[0].map((v, i) => Math.round(v + (a[1][i] - v) * a[2])).join(",") + ")"; };
+const lampColor = s => !s || !s.state ? "var(--well)" : s.r !== undefined && !s.temp ? `rgb(${s.r},${s.g},${s.b})` : tempColor(s.temp || 2700);
+const lamp = (color, dim) => { $("lamp").style.setProperty("--lamp", color); $("lamp").style.filter = `brightness(${.8 + .2 * dim / 100})`; };
+let cur = "var(--well)";
+function bulb(s) {
+  const on = !!(s && s.state);
+  $("pwr").disabled = $("dim").disabled = !s;
+  $("pwr").classList.toggle("on", on);
+  $("pwr").setAttribute("aria-pressed", on);
+  $("bstate").textContent = !s ? "Not responding" : !on ? "Off"
+    : (s.sceneId ? "Scene" : s.temp ? whiteName(s.temp) : "Colour") + " · " + s.dimming + "%";
+  if (s && s.dimming) { $("dim").value = s.dimming; fill($("dim"), on); }
+  lamp(lampColor(s), on ? s.dimming : 100); cur = lampColor(s);
+}
+$("pwr").onclick = async () => {
+  $("pwr").classList.toggle("on");
+  try { await api("set&state=toggle"); bulb((await api("status")).result); } catch { bulb(null); }
+};
+$("dim").oninput = e => { fill(e.target, true); lamp(cur, e.target.value); };
+for (const b of $("quick").children) b.onclick = async () => {
+  b.classList.add("sel");
+  try { await api(b.dataset.q); bulb((await api("status")).result); } catch { bulb(null); }
+  setTimeout(() => b.classList.remove("sel"), 600);
+};
+$("dim").onchange = async e => { try { await api("set&state=on&dimming=" + e.target.value); bulb((await api("status")).result); } catch { bulb(null); } };
+
+(async () => {
+  try { bulb((await api("status")).result); } catch { bulb(null); }
+  const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  try {
+    const n = await api("net");
+    $("line").innerHTML = n.up ? `Internet ${Math.round(n.ms)} ms · ${time}` : `<span class="err">Internet is down</span> · ${time}`;
+  } catch { $("line").textContent = time; }
+  try {
+    const d = (await api("devices")).devices || [];
+    const down = d.reduce((s, x) => s + (x.down || 0), 0) * 8 / 1e6;
+    $("dcount").textContent = d.length + " online";
+    $("dspeed").textContent = down.toFixed(1) + " Mbps down now";
+  } catch { $("dcount").textContent = "Unavailable"; }
+  try {
+    const rx = (await api("fibre"))["rx-power"];
+    if (rx == null) throw 0;
+    const [w, c] = rx > -8 ? ["Too strong", "bad"] : rx >= -24 ? ["Healthy", "good"] : rx >= -27 ? ["Weak", "warn"] : ["Critical", "bad"];
+    $("fword").textContent = w; $("fword").className = "big " + c;
+    $("fdbm").textContent = "Fibre · " + rx.toFixed(1) + " dBm";
+  } catch { $("fword").textContent = "No reading"; }
+})();
+</script>
+</body>
+</html>
