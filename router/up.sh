@@ -30,14 +30,9 @@ else  # never leave LAN DNS pointing at a dead server
   echo "WARNING: side dnsmasq failed; names off, normal DNS untouched"
 fi
 
-# own SSH on 192.168.1.1:2222, outside inetd: inetd disables port 22 after a burst of logins.
-# LAN address only, never the WAN side. Skipped if this dropbear can't bind an address.
-netstat -ltn | grep -q "192.168.1.1:2222 " || dropbear -p 192.168.1.1:2222 -r /etc/dropbear/dropbear_rsa_host_key </dev/null >/dev/null 2>&1
-
 ok() { if eval "$2" >/dev/null 2>&1; then echo "  ok    $1"; else echo "  FAIL  $1"; fi; }
 ok "web server"     'kill -0 $(cat loop.pid)'
 ok "internet alarm" 'kill -0 $(cat mon.pid)'
 ok "names DNS"      'kill -0 $(cat dns.pid)'
 ok "IP $IP :80"     'iptables -t nat -S PREROUTING | grep -q 8080'
 ok "bulb reachable" 'printf "GET /api?a=status HTTP/1.0\r\n\r\n" | ./sh | grep -q result'
-ok "ssh on :2222"    'netstat -ltn | grep -q "192.168.1.1:2222 "'
