@@ -49,7 +49,8 @@ router/            everything that runs on the router (all in RAM: /run/wiz)
   pages/           the web app: home, bulb, devices, fibre + style.css
   PRODUCT.md       product brief (impeccable design skill)
 bulb.sh, make_shortcut.py, Bulb.shortcut   macOS Shortcuts menu that talks to the bulb directly
-archive/           things that didn't work, with notes (captive-portal welcome pop-up)
+firmware/          read-only dump of the router: flash partitions, settings XML (credentials masked), vendor web server
+archive/           things that didn't work, with notes (captive-portal welcome pop-up, official BusyBox MIPS builds)
 ```
 
 ## Setup
