@@ -13,9 +13,28 @@ serves a small web app at **`http://tazer`** from its own shell and GNU `netcat`
 
 <sub>Home · Bulb · Devices · Fibre, at phone size. Captured from a local stand-in serving the same pages with real readings; device names changed.</sub>
 
+## Screenshots
+
+Phone (follows the system's light or dark setting):
+
+| Page | Light | Dark |
+|---|---|---|
+| **Home** | <img src="docs/screenshots/light-home.png" width="260" alt="Home, light theme"> | <img src="docs/screenshots/dark-home.png" width="260" alt="Home, dark theme"> |
+| **Bulb** | <img src="docs/screenshots/light-bulb.png" width="260" alt="Bulb, light theme"> | <img src="docs/screenshots/dark-bulb.png" width="260" alt="Bulb, dark theme"> |
+| **Devices** | <img src="docs/screenshots/light-devices.png" width="260" alt="Devices, light theme"> | <img src="docs/screenshots/dark-devices.png" width="260" alt="Devices, dark theme"> |
+| **Fibre** | <img src="docs/screenshots/light-fibre.png" width="260" alt="Fibre, light theme"> | <img src="docs/screenshots/dark-fibre.png" width="260" alt="Fibre, dark theme"> |
+
+Mac / wide screens (two columns):
+
+| Light | Dark |
+|---|---|
+| <img src="docs/screenshots/light-desktop.png" width="420" alt="Home on a wide screen, light theme"> | <img src="docs/screenshots/dark-desktop.png" width="420" alt="Home on a wide screen, dark theme"> |
+
+<sub>Captured from a local stand-in serving the same pages with real readings; device names changed.</sub>
+
 ## What it does
 - **Bulb** — on/off, brightness, white temperature, colours, WiZ scenes and speed, sleep timer.
-- **Devices** — who's on Wi-Fi, band, signal, live ↓/↑ speed and data since joining (from the Wi-Fi driver's `/proc/wlan*/sta_info`), wired devices from the bridge table.
+- **Devices** — who's on Wi-Fi with a device-type icon (phone, computer, TV, smart home, router) and OS guessed from its name and Wi-Fi chip, band, signal, live ↓/↑ speed and data since joining (from the Wi-Fi driver's `/proc/wlan*/sta_info`), wired devices from the bridge table.
 - **Fibre** — optical receive/transmit power, module temperature, voltage and laser current via the router's own `diag` tool, with a healthy/weak/critical verdict.
 - **Internet-down alarm** — pings out every 20 s; on an outage the bulb blinks and stays red, then returns to what it showed before.
 - **`http://tazer`** — a spare LAN IP on the router, port 80 redirected to the app, and a side `dnsmasq` answering the name.
