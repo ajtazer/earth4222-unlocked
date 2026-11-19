@@ -56,7 +56,7 @@ monitor() {
 }
 [ "$1" = monitor ] && { monitor; exit 0; }
 
-# ponytail: one request at a time; read -t stops an idle connection from hogging it
+# each listener takes one request at a time (up.sh runs several); read -t stops an idle connection hogging one
 read -t 1 -r method path ver || exit 0
 while read -t 1 -r l; do case "$l" in "" | "$CR") break ;; esac; done
 q=${path#*\?}; [ "$q" = "$path" ] && q=""
@@ -81,35 +81,24 @@ if [ -n "$page" ]; then
   usleep 150000; exit 0
 fi
 
-case "$(arg a)" in
-set)
-  p=""
-  for k in dimming temp r g b c w sceneId speed; do  # whitelist: reset/reboot unreachable
-    v=$(arg $k); case "$v" in '' | *[!0-9]*) ;; *) p="$p,\"$k\":$v" ;; esac
-  done
-  case "$(arg state)" in
-    on) p="$p,\"state\":true" ;;
-    off) p="$p,\"state\":false" ;;
-    toggle) case "$(send '{"method":"getPilot","params":{}}')" in
-              *'"state":true'*) p="$p,\"state\":false" ;; *) p="$p,\"state\":true" ;; esac ;;
-  esac
-  r=$(send "{\"method\":\"setPilot\",\"params\":{${p#,}}}") ;;
-status)
-  r=$(send '{"method":"getPilot","params":{}}') ;;
-net)  # one ping for the home status strip
+# data builders, shared by single endpoints and the combined home call
+netjson() {  # one ping
   ms=$(ping -c 1 -W 2 8.8.8.8 2>/dev/null | sed -n 's/.*time=\([0-9.]*\).*/\1/p')
-  if [ -n "$ms" ]; then r="{\"up\":true,\"ms\":$ms}"; else r='{"up":false}'; fi ;;
-fibre)  # optical module readings via the router's own RTK diag tool (read-only gets)
-  r=""
+  if [ -n "$ms" ]; then echo "{\"up\":true,\"ms\":$ms}"; else echo '{"up":false}'; fi
+}
+fibrejson() {  # optical module readings via the router's own RTK diag tool (read-only gets)
+  fj=""
   for k in rx-power tx-power temperature voltage bias-current; do
     v=$(diag pon get transceiver $k </dev/null 2>/dev/null | awk '/Power:|Temperature:|Voltage:|Current:/ { print $(NF-1); exit }')
-    r="$r,\"$k\":${v:-null}"
+    fj="$fj,\"$k\":${v:-null}"
   done
-  r="{${r#,}}" ;;
-devices)  # Wi-Fi driver stats per station + ARP (mac->ip) + router hosts file (ip->name); wired = ARP only
-  brctl showmacs br0 > $D/fdb 2>/dev/null  # bridge table: mac + seconds since last seen
-  # wired = in ARP, not on Wi-Fi, and seen on the bridge in the last 60s (drops ghosts of devices that left)
-  r="{\"devices\":[$(awk -v fdb="$D/fdb" '
+  echo "{${fj#,}}"
+}
+# Wi-Fi driver stats per station + ARP (mac->ip) + router hosts file (ip->name) as a JSON array.
+# wired = in ARP, not on Wi-Fi, and seen on the bridge in the last 60s (drops ghosts of devices that left)
+devarray() {
+  F=$D/fdb.$$; brctl showmacs br0 > $F 2>/dev/null  # per-request file: listeners run in parallel
+  echo "[$(awk -v fdb="$F" '
     function flush() {
       if (mac == "") return
       seen[mac] = 1; i = ip[mac]
@@ -130,7 +119,31 @@ devices)  # Wi-Fi driver stats per station + ARP (mac->ip) + router hosts file (
     END {
       flush()
       for (m in ip) if (!(m in seen) && (m in fresh)) { i = ip[m]; printf "%s{\"mac\":\"%s\",\"ip\":\"%s\",\"name\":\"%s\",\"band\":\"wired\"}", sep, m, i, name[i]; sep = "," }
-    }' /var/tmp/hosts /proc/net/arp $D/fdb /proc/wlan*/sta_info 2>/dev/null)]}" ;;
+    }' /var/tmp/hosts /proc/net/arp $F /proc/wlan*/sta_info 2>/dev/null)]"
+  rm -f $F
+}
+
+case "$(arg a)" in
+set)
+  p=""
+  for k in dimming temp r g b c w sceneId speed; do  # whitelist: reset/reboot unreachable
+    v=$(arg $k); case "$v" in '' | *[!0-9]*) ;; *) p="$p,\"$k\":$v" ;; esac
+  done
+  case "$(arg state)" in
+    on) p="$p,\"state\":true" ;;
+    off) p="$p,\"state\":false" ;;
+    toggle) case "$(send '{"method":"getPilot","params":{}}')" in
+              *'"state":true'*) p="$p,\"state\":false" ;; *) p="$p,\"state\":true" ;; esac ;;
+  esac
+  r=$(send "{\"method\":\"setPilot\",\"params\":{${p#,}}}") ;;
+status)
+  r=$(send '{"method":"getPilot","params":{}}') ;;
+net) r=$(netjson) ;;
+fibre) r=$(fibrejson) ;;
+devices) r="{\"devices\":$(devarray)}" ;;
+home)  # everything the home page shows, in one request
+  b=$(send "$GET")
+  r="{\"bulb\":${b:-null},\"net\":$(netjson),\"devices\":$(devarray),\"fibre\":$(fibrejson)}" ;;
 timer)
   m=$(arg min); case "$m" in '' | *[!0-9]*) m=0 ;; esac
   rm -f $T  # cancels any running timer loop

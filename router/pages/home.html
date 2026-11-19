@@ -107,25 +107,24 @@ for (const b of $("quick").children) b.onclick = async () => {
 $("dim").onchange = async e => { try { await api("set&state=on&dimming=" + e.target.value); bulb((await api("status")).result); } catch { bulb(null); } };
 
 (async () => {
-  try { bulb((await api("status")).result); } catch { bulb(null); }
   const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  try {
-    const n = await api("net");
-    $("line").innerHTML = n.up ? `Internet ${Math.round(n.ms)} ms · ${time}` : `<span class="err">Internet is down</span> · ${time}`;
-  } catch { $("line").textContent = time; }
-  try {
-    const d = (await api("devices")).devices || [];
-    const down = d.reduce((s, x) => s + (x.down || 0), 0) * 8 / 1e6;
-    $("dcount").textContent = d.length + " online";
+  let j = {};
+  try { j = await api("home"); } catch {}  // one request for the whole page
+  bulb(j.bulb && j.bulb.result || null);
+  const n = j.net;
+  $("line").innerHTML = !n ? time : n.up ? `Internet ${Math.round(n.ms)} ms · ${time}` : `<span class="err">Internet is down</span> · ${time}`;
+  if (j.devices) {
+    const down = j.devices.reduce((s, x) => s + (x.down || 0), 0) * 8 / 1e6;
+    $("dcount").textContent = j.devices.length + " online";
     $("dspeed").textContent = down.toFixed(1) + " Mbps down now";
-  } catch { $("dcount").textContent = "Unavailable"; }
-  try {
-    const rx = (await api("fibre"))["rx-power"];
-    if (rx == null) throw 0;
+  } else $("dcount").textContent = "Unavailable";
+  const rx = j.fibre && j.fibre["rx-power"];
+  if (rx == null) $("fword").textContent = "No reading";
+  else {
     const [w, c] = rx > -8 ? ["Too strong", "bad"] : rx >= -24 ? ["Healthy", "good"] : rx >= -27 ? ["Weak", "warn"] : ["Critical", "bad"];
     $("fword").textContent = w; $("fword").className = "big " + c;
     $("fdbm").textContent = "Fibre · " + rx.toFixed(1) + " dBm";
-  } catch { $("fword").textContent = "No reading"; }
+  }
 })();
 </script>
 </body>

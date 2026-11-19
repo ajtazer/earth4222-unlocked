@@ -43,7 +43,8 @@ Everything lives in router RAM, so a router reboot wipes it — run `deploy.sh` 
 ## Router quirks this works around
 - No `httpd`, no UDP in BusyBox `nc`; official busybox.net MIPS builds crash (illegal instruction). The router's own **GNU netcat 0.7.1** does UDP (`-u`) but never exits, so the handler waits for the reply and kills it.
 - `netcat -e PROG` runs PROG through BusyBox with argv0 = its basename, so the handler file must be named **`sh`**.
-- netcat closes with a TCP reset: every response carries `Content-Length` plus a short pause; the server handles one request at a time, so pages retry briefly.
+- netcat closes with a TCP reset: every response carries `Content-Length` plus a short pause.
+- GNU netcat takes one connection per run and needs ~190 ms to re-arm, so three listeners run (8080–8082). The kernel lacks the `statistic`, `multiport`, `u32` and `recent` matches and Macs pick sequential source ports, so connections are spread with the `limit` match as a token bucket: 8081 and 8082 each take at most one new connection per 250 ms, the rest go to 8080. A page and its parallel requests land on different listeners (tested: 30/30 three-at-once requests, no retries). CSS is inlined into each page at deploy and the home page fetches everything in one `/api?a=home` call.
 - **dropbear 0.48** silently drops remote commands longer than ~1 KB, so deploy copies `up.sh` and runs it instead of inlining.
 - The vendor's `configd` regenerates `/var/dnsmasq.conf` whenever dnsmasq restarts — names come from a separate dnsmasq on :5353 with LAN DNS redirected through it (and removed again if it ever fails to start).
 - Too many SSH logins in a row make `inetd` disable SSH for a while.
