@@ -58,7 +58,10 @@ archive/           things that didn't work, with notes (captive-portal welcome p
 2. `router/deploy.sh` (asks for the router's root password once).
 3. Open `http://tazer` on any device on the Wi-Fi.
 
-Everything lives in router RAM, so a router reboot wipes it — run `deploy.sh` again.
+Everything lives in router RAM, so a **router reboot wipes it** — run `deploy.sh` again. The router's
+rootfs is read-only and its only boot hook runs custom code in GPON mode only (this is an EPON line), so it
+can't self-start. For hands-off recovery, `autodeploy.sh` + the LaunchAgent redeploy from the Mac whenever
+tazer is found down on the home network (see `com.tazer.wiz-autodeploy.plist`).
 
 ## Router quirks this works around
 - No `httpd`, no UDP in BusyBox `nc`; official busybox.net MIPS builds crash (illegal instruction). The router's own **GNU netcat 0.7.1** does UDP (`-u`) but never exits, so the handler waits for the reply and kills it.
