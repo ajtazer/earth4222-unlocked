@@ -4,10 +4,14 @@
 cd "$(dirname "$0")"
 LOG=/tmp/wiz-autodeploy.log
 
-# already up? (the tazer server answers on its alias IP) -> nothing to do
-curl -s -m4 -o /dev/null -H "Host: tazer" http://192.168.1.2/ && exit 0
-# router not reachable (away from home, or router still booting) -> try again next time
+# router not reachable (away from home) -> try again next time
 ping -c1 -t2 192.168.1.1 >/dev/null 2>&1 || exit 0
+# already up? the one-at-a-time server can refuse a lone request, so only treat it as down
+# after several misses — a needless redeploy means a needless SSH login, which risks the lockout
+for i in 1 2 3 4 5; do
+  curl -s -m4 -o /dev/null -H "Host: tazer" http://192.168.1.2/ && exit 0
+  sleep 2
+done
 
 echo "$(date '+%F %T') tazer down, redeploying" >> "$LOG"
 AP=$(mktemp); printf '#!/bin/sh\necho root\n' > "$AP"; chmod 700 "$AP"   # router default password
