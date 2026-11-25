@@ -37,7 +37,7 @@ Mac / wide screens (two columns):
 - **Devices** — who's on Wi-Fi with a device-type icon (phone, computer, TV, smart home, router) and OS guessed from its name and Wi-Fi chip, band, signal, live ↓/↑ speed and data since joining (from the Wi-Fi driver's `/proc/wlan*/sta_info`), wired devices from the bridge table.
 - **Fibre** — a live optical scope: receive/transmit power, temperature, voltage and laser bias via the router's own `diag` tool with a healthy/weak/critical verdict, a link-budget headroom bar, your EPON **LLID** and the **MPCP clock** (the 16 ns-tick counter the OLT keeps the ONT synced to) ticking live, and a 24 h laser-health chart (Rx + bias) from a background logger.
 - **Internet-down alarm** — pings out every 20 s; on an outage the bulb blinks and stays red, then returns to what it showed before.
-- **`http://tazer`** — a spare LAN IP on the router, port 80 redirected to the app, and a side `dnsmasq` answering the name.
+- **`http://tazer`** — a spare LAN IP on the router, port 80 redirected to the app, and our own `dnsmasq` 2.90 answering the name and serving all LAN DNS via Google DNS (8.8.8.8/8.8.4.4).
 
 ## Layout
 ```
@@ -45,6 +45,7 @@ router/            everything that runs on the router (all in RAM: /run/wiz)
   wiz.sh           HTTP handler + bulb/devices/fibre/timer API + alarm loop (deployed as /run/wiz/sh)
   up.sh            starts the server, the alarm, the name/DNS setup; prints a checklist
   deploy.sh        copies it all to the router and runs up.sh (run again after a router reboot)
+  build-dnsmasq.sh builds router/dnsmasq: static soft-float MIPS dnsmasq 2.90 (needs zig); deploy.sh ships it
   config.example.sh  copy to config.sh: your bulb's MAC and fallback IP (config.sh is git-ignored)
   pages/           the web app: home, bulb, devices, fibre + style.css
   PRODUCT.md       product brief (impeccable design skill)
@@ -69,5 +70,5 @@ tazer is found down on the home network (see `com.tazer.wiz-autodeploy.plist`).
 - netcat closes with a TCP reset: every response carries `Content-Length` plus a short pause.
 - GNU netcat takes one connection per run and needs ~190 ms to re-arm, so three listeners run (8080–8082). The kernel lacks the `statistic`, `multiport`, `u32` and `recent` matches and Macs pick sequential source ports, so connections are spread with the `limit` match as a token bucket: 8081 and 8082 each take at most one new connection per 250 ms, the rest go to 8080. A page and its parallel requests land on different listeners (tested: 30/30 three-at-once requests, no retries). CSS is inlined into each page at deploy and the home page fetches everything in one `/api?a=home` call.
 - **dropbear 0.48** silently drops remote commands longer than ~1 KB, so deploy copies `up.sh` and runs it instead of inlining.
-- The vendor's `configd` regenerates `/var/dnsmasq.conf` whenever dnsmasq restarts — names come from a separate dnsmasq on :5353 with LAN DNS redirected through it (and removed again if it ever fails to start).
-- Too many SSH logins in a row make `inetd` disable SSH for a while.
+- The vendor's `configd` regenerates `/var/dnsmasq.conf` whenever dnsmasq restarts, and its dnsmasq 2.45 drops 10–30% of "no such name/record" answers and, after a PPPoE reconnect, keeps sending from the old WAN address so every lookup fails until reboot. LAN DNS is therefore redirected to our own dnsmasq 2.90 on :5353 (`build-dnsmasq.sh`), which forwards to Google DNS and answers the names. Not 1.1.1.1: it doesn't pass the client subnet on, so CDNs serve this ISP from far away (Apple's CDN: 112 ms and about 30% slower than via 8.8.8.8). If it fails to start, the vendor binary runs the same config; if that fails too, the redirect is removed.
+- Too many SSH logins in a row make `inetd` disable SSH for a while. A session that drops mid-way (e.g. during a Wi-Fi restart) does the same. A router restart clears it, and works remotely: web admin at `http://192.168.1.1/admin/login.asp` → Reboot, mode "Last Configuration" (never "Reset to Default").

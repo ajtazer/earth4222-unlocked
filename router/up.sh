@@ -23,8 +23,12 @@ done
 [ -f flog.pid ] && kill $(cat flog.pid) 2>/dev/null
 ./sh fibrelog </dev/null >/dev/null 2>&1 & echo $! > flog.pid  # laser health history, every 5 min
 
-# names: $IP:80 -> :8080, and a side dnsmasq on :5353 answering $NAMES (forwards the rest to the
-# real dnsmasq) with LAN DNS routed through it. Never touch the real one: the router regenerates
+# names: $IP:80 -> :8080, and a side dnsmasq on :5353 answering $NAMES, with LAN DNS routed through it.
+# Upstream is Google DNS, not 1.1.1.1: Google passes the client's subnet on, so CDNs pick servers inside
+# the ISP (Apple's CDN: 7 ms / 329 Mbps via 8.8.8.8 vs 112 ms / 215-243 Mbps via 1.1.1.1, 2026-11-25).
+# It's our own dnsmasq 2.90 (build-dnsmasq.sh) forwarding straight to 8.8.8.8/8.8.4.4: the vendor's 2.45
+# drops 10-30% of "no such name/record" answers, and after a PPPoE reconnect keeps sending from the dead
+# old WAN address (all lookups fail until reboot). Never touch the real one: the router regenerates
 # /var/dnsmasq.conf whenever it restarts.
 ip addr show br0 | grep -q "$IP/" || ip addr add $IP/32 dev br0
 # spread simultaneous connections over the listeners. This kernel lacks statistic, multiport, u32 and
@@ -35,10 +39,11 @@ iptables -t nat -S PREROUTING | grep -- "-d $IP/32 .*--dport 80 " | sed 's/^-A /
 iptables -t nat -I PREROUTING 1 -d $IP -p tcp --dport 80 -j REDIRECT --to-ports 8080
 iptables -t nat -I PREROUTING 1 -d $IP -p tcp --dport 80 -m limit --limit 4/second --limit-burst 1 -j REDIRECT --to-ports 8082
 iptables -t nat -I PREROUTING 1 -d $IP -p tcp --dport 80 -m limit --limit 4/second --limit-burst 1 -j REDIRECT --to-ports 8081
-printf 'user=\ngroup=\nno-resolv\ndomain-needed\nserver=127.0.0.1\n' > dns.conf  # domain-needed: plain names never leave the house
+printf 'user=\ngroup=\nno-resolv\ndomain-needed\ncache-size=1000\nserver=8.8.8.8\nserver=8.8.4.4\n' > dns.conf  # domain-needed: plain names never leave the house
 for n in $NAMES; do printf 'address=/%s/%s\naddress=/%s.bbrouter/%s\n' $n $IP $n $IP >> dns.conf; done
 [ -f dns.pid ] && kill $(cat dns.pid) 2>/dev/null && sleep 1
-dnsmasq -C /run/wiz/dns.conf -p 5353 -x /run/wiz/dns.pid </dev/null >/dev/null 2>&1; sleep 1
+/run/wiz/dnsmasq -C /run/wiz/dns.conf -p 5353 -x /run/wiz/dns.pid </dev/null >/dev/null 2>&1 ||  # vendor 2.45 as fallback
+  dnsmasq -C /run/wiz/dns.conf -p 5353 -x /run/wiz/dns.pid </dev/null >/dev/null 2>&1; sleep 1
 if kill -0 $(cat dns.pid 2>/dev/null) 2>/dev/null; then
   for p in udp tcp; do
     iptables -t nat -S PREROUTING | grep -q "$p.*dport 53 -j REDIRECT" ||
@@ -52,7 +57,7 @@ fi
 ok() { if eval "$2" >/dev/null 2>&1; then echo "  ok    $1"; else echo "  FAIL  $1"; fi; }
 ok "web servers x3" 'for p in $(cat loop.pid); do kill -0 $p || exit 1; done'
 ok "internet alarm" 'kill -0 $(cat mon.pid)'
-ok "names DNS"      'kill -0 $(cat dns.pid)'
+ok "names DNS 2.90" 'grep -q /run/wiz/dnsmasq /proc/$(cat dns.pid)/cmdline'
 ok "IP $IP :80 x3"  '[ "$(iptables -t nat -S PREROUTING | grep -c -- "-d $IP/32 .*--dport 80 ")" = 3 ]'
 ok "bulb reachable" 'printf "GET /api?a=status HTTP/1.0\r\n\r\n" | ./sh | grep -q result'
 ok "fibre logger"   'kill -0 $(cat flog.pid)'
