@@ -51,6 +51,7 @@ router/            everything that runs on the router (all in RAM: /run/wiz)
   PRODUCT.md       product brief (impeccable design skill)
 bulb.sh, make_shortcut.py, Bulb.shortcut   macOS Shortcuts menu that talks to the bulb directly
 firmware/          read-only dump of the router: flash partitions, settings XML (credentials masked), vendor web server
+network/           Wi-Fi + internet diagnostics (diag.sh, netdiag.sh, dnsbench.sh) and the 2026-11-25 before/after results
 archive/           things that didn't work, with notes (captive-portal welcome pop-up, official BusyBox MIPS builds)
 ```
 

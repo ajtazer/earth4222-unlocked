@@ -1,0 +1,103 @@
+{
+  "gateway_available": true,
+  "gateway_detected": true,
+  "gateway_probe": {
+    "error": null,
+    "status": "ok",
+    "summary": {
+      "avg_ms": 7.294,
+      "jitter_ms": 0.51,
+      "max_ms": 8.396,
+      "min_ms": 6.185,
+      "packet_loss_percent": 0.0
+    }
+  },
+  "gateway_source": "auto",
+  "https_probe": {
+    "results": [
+      {
+        "attempt": 1,
+        "connect_seconds": 0.020707,
+        "error": null,
+        "family": "IPv4",
+        "http_code": "200",
+        "ok": true,
+        "total_seconds": 0.124166,
+        "url": "https://example.com"
+      },
+      {
+        "attempt": 2,
+        "connect_seconds": 0.013602,
+        "error": null,
+        "family": "IPv4",
+        "http_code": "200",
+        "ok": true,
+        "total_seconds": 0.044257,
+        "url": "https://example.com"
+      },
+      {
+        "attempt": 1,
+        "connect_seconds": 0.024893,
+        "error": null,
+        "family": "IPv4",
+        "http_code": "200",
+        "ok": true,
+        "total_seconds": 0.046155,
+        "url": "https://www.cloudflare.com"
+      },
+      {
+        "attempt": 2,
+        "connect_seconds": 0.014278,
+        "error": null,
+        "family": "IPv4",
+        "http_code": "200",
+        "ok": true,
+        "total_seconds": 0.036907,
+        "url": "https://www.cloudflare.com"
+      },
+      {
+        "attempt": 1,
+        "connect_seconds": 0.014218,
+        "error": null,
+        "family": "IPv6",
+        "http_code": "200",
+        "ok": true,
+        "total_seconds": 0.038424,
+        "url": "https://example.com"
+      },
+      {
+        "attempt": 2,
+        "connect_seconds": 0.013266,
+        "error": null,
+        "family": "IPv6",
+        "http_code": "200",
+        "ok": true,
+        "total_seconds": 0.042163,
+        "url": "https://example.com"
+      },
+      {
+        "attempt": 1,
+        "connect_seconds": 0.015426,
+        "error": null,
+        "family": "IPv6",
+        "http_code": "200",
+        "ok": true,
+        "total_seconds": 0.03726,
+        "url": "https://www.cloudflare.com"
+      },
+      {
+        "attempt": 2,
+        "connect_seconds": 0.011163,
+        "error": null,
+        "family": "IPv6",
+        "http_code": "200",
+        "ok": true,
+        "total_seconds": 0.03488,
+        "url": "https://www.cloudflare.com"
+      }
+    ],
+    "status": "ok"
+  },
+  "platform": "Darwin",
+  "schema_version": 2
+}

@@ -1,0 +1,136 @@
+=== run 1 19:43:22
+==== Verbose Results ====
+---
+Capacity:
+---
+   Uplink capacity: 312.841 Mbps
+      Accuracy: High
+      Uplink bytes transferred: 551.688 MB
+      Uplink Flow count: 8
+   Downlink capacity: 309.742 Mbps
+      Accuracy: High
+      Downlink bytes transferred: 256.155 MB
+      Downlink Flow count: 6
+---
+Latency:
+---
+   Idle Latency:
+      4270 RPM (14.050 milliseconds)
+         Transport: 6000 RPM (10.000 milliseconds)
+         Security: 2436 RPM (24.625 milliseconds)
+         HTTP: 7974 RPM (7.524 milliseconds)
+      Accuracy: High
+   Uplink Responsiveness: Medium
+      696 RPM (86.140 milliseconds)
+         Transport: 3551 RPM (16.892 milliseconds)
+         Security: 1816 RPM (33.032 milliseconds)
+         HTTP: 2876 RPM (20.860 milliseconds)
+         HTTP loaded: 422 RPM (141.948 milliseconds)
+      Accuracy: High
+   Downlink Responsiveness: High
+      2739 RPM (21.903 milliseconds)
+         Transport: 7500 RPM (8.000 milliseconds)
+         Security: 1363 RPM (44.000 milliseconds)
+         HTTP: 7568 RPM (7.927 milliseconds)
+         HTTP loaded: 1596 RPM (37.583 milliseconds)
+      Accuracy: High
+---
+Protocols Used:
+---
+    HTTP/2: 100%
+---
+Transport-layer info:
+---
+    ECN Disabled: 100%, L4S Disabled: 100%
+---
+Other Info:
+---
+   Test Endpoint: innda3-edge-fx-003.aaplimg.com
+   Interface: en0
+   Start: 2026-11-25 19:43:22.226
+   End: 2026-11-25 19:43:43.080
+   Duration: 20.85s
+   Downlink Phase Length: 6.03s
+   Uplink Phase Length: 8.00s
+   OS Version: Version 27.2.1 (Build 26B131)
+
+==== SUMMARY ====
+Uplink capacity: 312.841 Mbps
+Downlink capacity: 309.742 Mbps
+Uplink Responsiveness: Medium (86.140 milliseconds | 696 RPM)
+Downlink Responsiveness: High (21.903 milliseconds | 2739 RPM)
+Idle Latency: 14.050 milliseconds | 4270 RPM
+=== run 2 19:43:43
+==== Verbose Results ====
+---
+Capacity:
+---
+   Uplink capacity: 315.740 Mbps
+      Accuracy: High
+      Uplink bytes transferred: 508.375 MB
+      Uplink Flow count: 8
+   Downlink capacity: 328.485 Mbps
+      Accuracy: High
+      Downlink bytes transferred: 208.038 MB
+      Downlink Flow count: 5
+---
+Latency:
+---
+   Idle Latency:
+      3774 RPM (15.896 milliseconds)
+         Transport: 6956 RPM (8.625 milliseconds)
+         Security: 1853 RPM (32.375 milliseconds)
+         HTTP: 8970 RPM (6.689 milliseconds)
+      Accuracy: High
+   Uplink Responsiveness: Medium
+      745 RPM (80.515 milliseconds)
+         Transport: 3496 RPM (17.159 milliseconds)
+         Security: 1787 RPM (33.568 milliseconds)
+         HTTP: 3335 RPM (17.989 milliseconds)
+         HTTP loaded: 377 RPM (159.052 milliseconds)
+      Accuracy: High
+   Downlink Responsiveness: High
+      2590 RPM (23.158 milliseconds)
+         Transport: 8095 RPM (7.411 milliseconds)
+         Security: 1246 RPM (48.144 milliseconds)
+         HTTP: 7552 RPM (7.944 milliseconds)
+         HTTP loaded: 1815 RPM (33.044 milliseconds)
+      Accuracy: High
+---
+Protocols Used:
+---
+    HTTP/2: 100%
+---
+Transport-layer info:
+---
+    ECN Disabled: 100%, L4S Disabled: 100%
+---
+Other Info:
+---
+   Test Endpoint: innda3-edge-fx-007.aaplimg.com
+   Interface: en0
+   Start: 2026-11-25 19:43:43.134
+   End: 2026-11-25 19:44:01.516
+   Duration: 18.38s
+   Downlink Phase Length: 5.06s
+   Uplink Phase Length: 7.41s
+   OS Version: Version 27.2.1 (Build 26B131)
+
+==== SUMMARY ====
+Uplink capacity: 315.740 Mbps
+Downlink capacity: 328.485 Mbps
+Uplink Responsiveness: Medium (80.515 milliseconds | 745 RPM)
+Downlink Responsiveness: High (23.158 milliseconds | 2590 RPM)
+Idle Latency: 15.896 milliseconds | 3774 RPM
+
+=== DNS 19:46:45 (10 samples each)
+192.168.1.1   new:  135 ms median, 1169 ms max, 2/10 timeouts | popular:   10 ms median,   12 ms max, 0/10 timeouts
+163.53.87.74  new:   69 ms median,  178 ms max, 1/10 timeouts | popular:    8 ms median,   10 ms max, 0/10 timeouts
+1.1.1.1       new:   11 ms median,   33 ms max, 0/10 timeouts | popular:    9 ms median,   31 ms max, 0/10 timeouts
+8.8.8.8       new:  170 ms median,  397 ms max, 0/10 timeouts | popular:   10 ms median,   47 ms max, 0/10 timeouts
+
+=== DNS 19:58 (20 new / 20 empty / 10 popular; ms; :5397/:5398 = temp router dnsmasq 2.45 pointed at 1.1.1.1+8.8.8.8 / 1.1.1.1 only)
+192.168.1.1      new  104 med  239 max  2/20 lost | empty   42 med   87 max  3/20 lost | popular   31 med   38 max  0/10 lost
+192.168.1.1:5397 new  137 med 1171 max  1/20 lost | empty   18 med   91 max  3/20 lost | popular   12 med   14 max  0/10 lost
+192.168.1.1:5398 new   15 med   18 max  1/20 lost | empty   43 med  440 max  4/20 lost | popular   14 med   15 max  0/10 lost
+1.1.1.1          new   12 med   54 max  0/20 lost | empty   12 med  425 max  0/20 lost | popular   10 med   15 max  0/10 lost

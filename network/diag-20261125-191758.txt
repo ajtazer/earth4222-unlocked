@@ -1,0 +1,109 @@
+================ tazer / internet diagnosis ================
+when: Wed Nov 25 19:17:58 IST 2026
+
+
+----- 1. This Mac's network -----
+Wi-Fi IP (en0): 192.168.1.34
+Default gateway: 192.168.1.1
+Mac DNS servers: 192.168.1.1 
+SSID: <redacted>
+
+----- 2. Can the Mac reach the router at 192.168.1.1 -----
+--- 192.168.1.1 ping statistics ---
+2 packets transmitted, 2 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 128.032/173.077/218.122/45.045 ms
+
+----- 3. DNS vs raw IP (tells apart 'DNS broken' from 'no internet at all') -----
+-- ping 8.8.8.8 by IP (no DNS needed):
+--- 8.8.8.8 ping statistics ---
+2 packets transmitted, 2 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 18.960/54.999/91.038/36.039 ms
+-- ping 1.1.1.1 by IP:
+--- 1.1.1.1 ping statistics ---
+2 packets transmitted, 2 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 33.176/97.036/160.896/63.860 ms
+-- resolve google.com via router DNS:
+192.178.177.138
+192.178.177.100
+192.178.177.101
+-- resolve google.com via public DNS 8.8.8.8:
+172.217.26.110
+
+----- 4. Is tazer up (did our RAM setup survive, i.e. did the router reboot) -----
+tazer server .2:80 -> HTTP 000
+(000 = tazer down = router rebooted = our stuff already wiped = NOT the cause)
+
+----- 5. Router-side diagnostics (SSH) -----
+>> SSH reached the router.
+
+[uptime — low = recently rebooted = our setup was already wiped]
+90.29 320.60
+
+
+[WAN / PPPoE session — is the internet link itself up?]
+          inet addr:10.190.149.155  P-t-P:10.190.128.1  Mask:255.255.255.255
+default dev ppp0  scope link 
+
+[FIBRE optical levels — the big one. Rx below -27 dBm or no reading = line/ISP problem]
+  rx-power:     -23.665315
+  tx-power:     1.999498
+  temperature:  31.640625
+  voltage:      3.244800
+  bias-current: 13.000000
+
+[EPON registration — is the ONT registered with the ISP's OLT?]
+idx:0 LLID:    10 valid:1 report_timer:   5 report_timeout:0 mac-address:3C:46:45:29:6A:F2
+fiber_mode = Pre-defined
+
+[Router -> gateway and -> internet (from the router itself)]
+gateway=ppp0
+tail: invalid option -- 2
+BusyBox v1.22.1 (2023-02-10 14:25:06 IST) multi-call binary.
+
+Usage: tail [OPTIONS] [FILE]...
+
+Print last 10 lines of each FILE (or stdin) to stdout.
+With more than one FILE, precede each with a filename header.
+
+	-f		Print data as file grows
+	-n N[kbm]	Print last N lines
+	-n +N[kbm]	Start on Nth line and print the rest
+
+tail: invalid option -- 2
+BusyBox v1.22.1 (2023-02-10 14:25:06 IST) multi-call binary.
+
+Usage: tail [OPTIONS] [FILE]...
+
+Print last 10 lines of each FILE (or stdin) to stdout.
+With more than one FILE, precede each with a filename header.
+
+	-f		Print data as file grows
+	-n N[kbm]	Print last N lines
+	-n +N[kbm]	Start on Nth line and print the rest
+
+
+[Did OUR stuff touch anything? LAN-side only, listed to rule it out]
+alias IP:
+    inet 192.168.1.1/24 brd 192.168.1.255 scope global br0
+our nat rules:
+  (none — our setup is not loaded)
+side dnsmasq:
+  (our dnsmasq not running)
+
+[Recent kernel/PON log — look for LOS (loss of signal), dereg, link down]
+tail: invalid option -- 1
+BusyBox v1.22.1 (2023-02-10 14:25:06 IST) multi-call binary.
+
+Usage: tail [OPTIONS] [FILE]...
+
+Print last 10 lines of each FILE (or stdin) to stdout.
+With more than one FILE, precede each with a filename header.
+
+	-f		Print data as file grows
+	-n N[kbm]	Print last N lines
+	-n +N[kbm]	Start on Nth line and print the rest
+
+(no dmesg)
+
+================ END. Report saved to: /Users/tazer/wiz/diag-20261125-191758.txt ================
+Bring this file (or paste it) back to Claude.

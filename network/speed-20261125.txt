@@ -1,0 +1,109 @@
+=== BEFORE: channel 44 (current)  20:19:23
+Channel: 44 (5GHz, 80MHz) | Signal / Noise: -55 dBm / -90 dBm | Transmit Rate: 650 | MCS Index: 7 | 
+ interence_time: 39  free_Time: 57  ch_load(include interence):43 
+  both-at-once #1: Uplink capacity: 123.199 Mbps
+  both-at-once #1: Downlink capacity: 215.251 Mbps
+  both-at-once #1: Responsiveness: Low (302.088 milliseconds | 198 RPM)
+  both-at-once #1: Idle Latency: 129.898 milliseconds | 461 RPM
+  both-at-once #2: Uplink capacity: 168.911 Mbps
+  both-at-once #2: Downlink capacity: 233.319 Mbps
+  both-at-once #2: Responsiveness: Low (343.869 milliseconds | 174 RPM)
+  both-at-once #2: Idle Latency: 122.139 milliseconds | 491 RPM
+  one-way #1: Uplink capacity: 293.972 Mbps
+  one-way #1: Downlink capacity: 192.803 Mbps
+  one-way #1: Uplink Responsiveness: Medium (82.576 milliseconds | 726 RPM)
+  one-way #1: Downlink Responsiveness: Medium (284.549 milliseconds | 210 RPM)
+  one-way #1: Idle Latency: 59.980 milliseconds | 1000 RPM
+  one-way #2: Uplink capacity: 287.753 Mbps
+  one-way #2: Downlink capacity: 306.894 Mbps
+  one-way #2: Uplink Responsiveness: Medium (197.654 milliseconds | 303 RPM)
+  one-way #2: Downlink Responsiveness: Medium (97.546 milliseconds | 615 RPM)
+  one-way #2: Idle Latency: 44.374 milliseconds | 1352 RPM
+=== BASELINE (DNS fixed): channel 44  20:26:38
+Channel: 44 (5GHz, 80MHz) | Signal / Noise: -54 dBm / -91 dBm | Transmit Rate: 650 | MCS Index: 5 | 
+ interence_time: 38  free_Time: 59  ch_load(include interence):41 
+  both-at-once #1: Uplink capacity: 168.120 Mbps
+  both-at-once #1: Downlink capacity: 182.240 Mbps
+  both-at-once #1: Responsiveness: Medium (138.096 milliseconds | 434 RPM)
+  both-at-once #1: Idle Latency: 14.703 milliseconds | 4080 RPM
+  both-at-once #2: Uplink capacity: 179.698 Mbps
+  both-at-once #2: Downlink capacity: 213.982 Mbps
+  both-at-once #2: Responsiveness: Medium (279.048 milliseconds | 215 RPM)
+  both-at-once #2: Idle Latency: 14.975 milliseconds | 4006 RPM
+  one-way #1: Uplink capacity: 311.138 Mbps
+  one-way #1: Downlink capacity: 302.135 Mbps
+  one-way #1: Uplink Responsiveness: Medium (125.123 milliseconds | 479 RPM)
+  one-way #1: Downlink Responsiveness: High (31.865 milliseconds | 1882 RPM)
+  one-way #1: Idle Latency: 15.539 milliseconds | 3861 RPM
+  one-way #2: Uplink capacity: 306.167 Mbps
+  one-way #2: Downlink capacity: 335.688 Mbps
+  one-way #2: Uplink Responsiveness: Medium (121.068 milliseconds | 495 RPM)
+  one-way #2: Downlink Responsiveness: Medium (67.154 milliseconds | 893 RPM)
+  one-way #2: Idle Latency: 14.535 milliseconds | 4128 RPM
+=== TEST: channel 36  20:28:53
+Channel: 36 (5GHz, 80MHz) | Signal / Noise: -53 dBm / -90 dBm | Transmit Rate: 650 | MCS Index: 7 | 
+ interence_time: 33  free_Time: 63  ch_load(include interence):37 
+  both-at-once #1: Uplink capacity: 311.023 Mbps
+  both-at-once #1: Downlink capacity: 197.912 Mbps
+  both-at-once #1: Responsiveness: Medium (98.649 milliseconds | 608 RPM)
+  both-at-once #1: Idle Latency: 15.960 milliseconds | 3759 RPM
+  both-at-once #2: Uplink capacity: 241.182 Mbps
+  both-at-once #2: Downlink capacity: 291.927 Mbps
+  both-at-once #2: Responsiveness: Medium (68.460 milliseconds | 876 RPM)
+  both-at-once #2: Idle Latency: 15.706 milliseconds | 3820 RPM
+  one-way #1: Uplink capacity: 313.070 Mbps
+  one-way #1: Downlink capacity: 308.890 Mbps
+  one-way #1: Uplink Responsiveness: Medium (71.479 milliseconds | 839 RPM)
+  one-way #1: Downlink Responsiveness: High (26.712 milliseconds | 2246 RPM)
+  one-way #1: Idle Latency: 17.124 milliseconds | 3503 RPM
+=== TEST: channel 149  20:30:19
+Channel: 149 (5GHz, 80MHz) | Signal / Noise: -56 dBm / -93 dBm | Transmit Rate: 0 | MCS Index: 7 | 
+ interence_time: 97  free_Time: 0  ch_load(include interence):100 
+  both-at-once #1: Uplink capacity: 217.579 Mbps
+  both-at-once #1: Downlink capacity: 222.365 Mbps
+  both-at-once #1: Responsiveness: Medium (98.491 milliseconds | 609 RPM)
+  both-at-once #1: Idle Latency: 16.364 milliseconds | 3666 RPM
+  both-at-once #2: Uplink capacity: 195.536 Mbps
+  both-at-once #2: Downlink capacity: 262.141 Mbps
+  both-at-once #2: Responsiveness: Medium (254.058 milliseconds | 236 RPM)
+  both-at-once #2: Idle Latency: 32.606 milliseconds | 1840 RPM
+  one-way #1: Uplink capacity: 317.432 Mbps
+  one-way #1: Downlink capacity: 329.254 Mbps
+  one-way #1: Uplink Responsiveness: Medium (96.157 milliseconds | 623 RPM)
+  one-way #1: Downlink Responsiveness: High (37.127 milliseconds | 1616 RPM)
+  one-way #1: Idle Latency: 17.731 milliseconds | 3383 RPM
+=== AFTER: channel 36 pinned + router DNS fixed (Google)  20:46:04
+Channel: 36 (5GHz, 80MHz) | Signal / Noise: -61 dBm / -90 dBm | Transmit Rate: 520 | MCS Index: 5 | 
+ interence_time: 97  free_Time: 0  ch_load(include interence):100 
+  both-at-once #1: Uplink capacity: 180.051 Mbps
+  both-at-once #1: Downlink capacity: 278.526 Mbps
+  both-at-once #1: Responsiveness: Medium (197.486 milliseconds | 303 RPM)
+  both-at-once #1: Idle Latency: 20.388 milliseconds | 2942 RPM
+  both-at-once #2: Uplink capacity: 171.694 Mbps
+  both-at-once #2: Downlink capacity: 246.890 Mbps
+  both-at-once #2: Responsiveness: Medium (100.232 milliseconds | 598 RPM)
+  both-at-once #2: Idle Latency: 14.069 milliseconds | 4264 RPM
+  both-at-once #3: Uplink capacity: 248.038 Mbps
+  both-at-once #3: Downlink capacity: 258.331 Mbps
+  both-at-once #3: Responsiveness: Medium (135.701 milliseconds | 442 RPM)
+  both-at-once #3: Idle Latency: 16.838 milliseconds | 3563 RPM
+  one-way #1: Uplink capacity: 300.085 Mbps
+  one-way #1: Downlink capacity: 309.435 Mbps
+  one-way #1: Uplink Responsiveness: Medium (95.619 milliseconds | 627 RPM)
+  one-way #1: Downlink Responsiveness: High (23.607 milliseconds | 2541 RPM)
+  one-way #1: Idle Latency: 13.565 milliseconds | 4423 RPM
+  one-way #2: Uplink capacity: 324.666 Mbps
+  one-way #2: Downlink capacity: 305.837 Mbps
+  one-way #2: Uplink Responsiveness: Medium (106.199 milliseconds | 564 RPM)
+  one-way #2: Downlink Responsiveness: High (24.416 milliseconds | 2457 RPM)
+  one-way #2: Idle Latency: 14.764 milliseconds | 4064 RPM
+
+=== SUMMARY (networkQuality, Mac on 5 GHz Wi-Fi; plan caps each direction at ~310-330 Mbps)
+                         BEFORE: ch 44 (19:23-20:27)            AFTER: ch 36 pinned, DNS fixed (20:28-20:48)
+one-way download         302-336 Mbps                            306-309 Mbps     (plan maximum both times)
+one-way upload           306-316 Mbps                            300-325 Mbps
+both at once, combined   350 / 394 / 543 -> median 394 Mbps      419 / 458 / 506 / 509 / 533 -> median 506 Mbps
+both at once, RPM        215 / 434 / 696 -> median 434           303 / 442 / 598 / 608 / 876 -> median 598
+idle latency             14-16 ms                                14-17 ms
+DNS lookups lost         12-30% (+ all fail after a reconnect)   0/50 (router -> dnsmasq 2.90 -> Google)
+excluded: 20:19 ch-44 run, skewed by the 1.1.1.1 CDN mapping (Apple CDN 112 ms / 215-243 Mbps vs 7 ms / 329 Mbps via 8.8.8.8)

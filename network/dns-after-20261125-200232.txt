@@ -1,0 +1,10 @@
+=== DNS after 20:02:32: Mac -> 1.1.1.1 1.0.0.1 8.8.8.8, *.bbrouter -> router
+192.168.1.1      new  102 med 1548 max  6/20 lost | empty   33 med  130 max  3/20 lost | popular   11 med   14 max  0/10 lost
+1.1.1.1          new   11 med   54 max  0/20 lost | empty   34 med  421 max  0/20 lost | popular   10 med   10 max  0/10 lost
+-- system path (getaddrinfo via mDNSResponder, 20 random new names)
+system lookup: 15 ms median, 26 ms max, 0/20 over 1s
+192.168.1.1      new   84 med  653 max  0/20 lost | empty   35 med 1371 max  0/20 lost | popular   10 med   12 max  0/10 lost
+1.1.1.1          new   11 med   43 max  0/20 lost | empty   11 med  426 max  0/20 lost | popular   10 med   11 max  0/10 lost
+
+=== DNS after 2 20:26:20: Mac -> router -> our dnsmasq 2.90 -> Google 8.8.8.8/8.8.4.4 (ms; 20 new, 20 empty, 10 popular)
+192.168.1.1      new  100 med 1095 max  0/20 lost | empty   47 med  129 max  0/20 lost | popular   30 med  202 max  0/10 lost

@@ -1,0 +1,155 @@
+### Network benchmark (baseline) — Wed Nov 25 19:23:09 IST 2026
+gateway: 192.168.1.1
+
+========== 1a. Wi-Fi link (this Mac) ==========
+              PHY Mode: 802.11ac
+              Channel: 44 (5GHz, 80MHz)
+              Network Type: Infrastructure
+              Security: WPA/WPA2 Personal
+              Signal / Noise: -55 dBm / -94 dBm
+              Transmit Rate: 650
+              MCS Index: 7
+              PHY Mode: 802.11a/n/ac
+              Channel: 157 (5GHz, 80MHz)
+              Network Type: Infrastructure
+              Security: WPA/WPA2 Personal
+              Signal / Noise: -61 dBm / -92 dBm
+              PHY Mode: 802.11a/n/ac
+              Channel: 60 (5GHz, 80MHz)
+              Network Type: Infrastructure
+              Security: WPA/WPA2 Personal
+              Signal / Noise: -92 dBm / -92 dBm
+              PHY Mode: 802.11b/g/n
+              Channel: 9 (2GHz, 40MHz)
+              Network Type: Infrastructure
+-- interface errors (en0):
+Name Ipkts Ierrs Ibytes Opkts Oerrs Obytes Coll
+en0 13220224 0 13270937928 8372482 0 6023394715 0
+
+========== 1b. RF congestion per channel (from the router's own scan — better than a Mac scan) ==========
+
+========== 2a. Idle latency — gateway (192.168.1.1), 30 packets ==========
+--- 192.168.1.1 ping statistics ---
+30 packets transmitted, 30 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 5.237/8.315/22.249/3.371 ms
+
+========== 2b. Idle latency — 1.1.1.1, 30 packets ==========
+--- 1.1.1.1 ping statistics ---
+30 packets transmitted, 30 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 6.934/9.000/23.119/3.234 ms
+
+(no global IPv6 — skipping IPv6 ping)
+
+========== 2d. Traceroute (5 hops) to 1.1.1.1 — separates Wi-Fi/LAN from ISP ==========
+traceroute to 1.1.1.1 (1.1.1.1), 5 hops max, 40 byte packets
+ 1  earth-4222.bbrouter (192.168.1.1)  18.777 ms
+ 2  10.190.128.1 (10.190.128.1)  16.053 ms
+ 3  reverse.anonet.in (163.53.87.161)  9.685 ms
+ 4  reverse.anonet.in (45.248.174.26)  9.103 ms
+ 5  *
+
+========== 2e. Local bandwidth hogs / VPN / recent roam events ==========
+-- VPN/tunnel interfaces up:
+utun0: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1500
+utun1: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1380
+utun2: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 2000
+utun3: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1000
+utun4: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1380
+utun5: flags=8051<UP,POINTOPOINT,RUNNING,MULTICAST> mtu 1380
+-- top talkers right now (nettop 2s):
+mDNSResponder.514,10811185,5548902,
+mDNSResponder.514,10809047,5547894,
+ssh.22258,2293006,467486,
+ssh.22258,2292530,466578,
+Claude Helper.99614,728395,782020,
+Claude Helper.99614,728395,782020,
+-- recent Wi-Fi disconnect/roam events:
+
+========== 3. DNS latency (uncached, random subdomain) — current vs 1.1.1.1 / 8.8.8.8 / router ==========
+current Mac DNS: 192.168.1.1 
+  via 192.168.1.1 timeout
+  via 1.1.1.1    12 msec
+  via 8.8.8.8    14 msec
+
+========== 4. Throughput & bufferbloat (networkQuality -v) — runs ALONE, no pings during this ==========
+Capacity:
+   Uplink capacity: 248.891 Mbps
+      Uplink bytes transferred: 369.562 MB
+      Uplink Flow count: 13
+   Downlink capacity: 294.494 Mbps
+      Downlink bytes transferred: 480.171 MB
+      Downlink Flow count: 5
+Latency:
+   Idle Latency:
+      3336 RPM (17.983 milliseconds)
+         Transport: 6760 RPM (8.875 milliseconds)
+         Security: 1558 RPM (38.500 milliseconds)
+         HTTP: 9128 RPM (6.573 milliseconds)
+   Responsiveness: Medium
+      696 RPM (86.130 milliseconds)
+         Transport: 762 RPM (78.680 milliseconds)
+         Security: 631 RPM (94.948 milliseconds)
+         HTTP: 840 RPM (71.412 milliseconds)
+         HTTP loaded: 580 RPM (103.305 milliseconds)
+    ECN Disabled: 100%, L4S Disabled: 100%
+
+========== 5. Router-side: Wi-Fi config + per-channel congestion (SSH, read-only) ==========
+[radios: band / channel / width / mode]
+== wlan0
+    opmode: 0x10
+== wlan1
+    opmode: 0x10
+
+[config.xml wireless: channel / width / mode / band-steering / guest SSIDs]
+Name="WLAN_BAND" Value="76"
+Name="WLAN1_CHANNEL" Value="11"
+Name="WLAN1_WLAN_MODE" Value="0"
+Name="WLAN1_BAND" Value="11"
+
+[guest / extra SSIDs enabled?]
+
+[per-channel load / noise (router ACS scan — lower score = cleaner)]
+== wlan0 ch_load:
+Channel usage (0~100%):
+    interence_time:     1
+    DUT_Time:           4
+    other_APs_Time:     1
+   acs:
+  Original: CH:44 2nd_offset:2
+  Channel Score
+  ===============
+  36:46
+  40:41
+  44:0
+  48:0
+  149:57
+  153:57
+  157:95
+  161:95
+  165:100
+== wlan1 ch_load:
+Channel usage (0~100%):
+    interence_time:     8
+    DUT_Time:           3
+    other_APs_Time:     1
+   acs:
+  Original: CH:1 2nd_offset:2
+  Channel Score
+  ===============
+  1:59
+  2:77
+  3:66
+  4:63
+  5:86
+  6:91
+  7:95
+  8:85
+  9:83
+  10:79
+  11:85
+
+[stations on each radio right now]
+wlan0: 2 connected
+wlan1: 1 connected
+
+### DONE (baseline). Report: /Users/tazer/wiz/netdiag-baseline-20261125-192309.txt
